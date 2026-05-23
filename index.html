@@ -1,0 +1,2429 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+<title>Natitur – Orçamento</title>
+<link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;600;700;800&family=DM+Sans:wght@300;400;500&display=swap" rel="stylesheet">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+<style>
+:root {
+  --bg: #0b1a12;
+  --surface: #102019;
+  --card: #162a1e;
+  --border: #234733;
+  --accent: #3db87a;
+  --accent2: #7ee8b0;
+  --amber: #f5a623;
+  --text: #e8f5ee;
+  --muted: #6a9e80;
+  --success: #3db87a;
+  --danger: #e05555;
+  --radius: 14px;
+}
+
+* { box-sizing: border-box; margin: 0; padding: 0; -webkit-tap-highlight-color: transparent; }
+
+body {
+  background: var(--bg);
+  color: var(--text);
+  font-family: 'DM Sans', sans-serif;
+  min-height: 100vh;
+  padding-bottom: 130px;
+}
+
+/* ─── LOGO ─── */
+.logo-wrap {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.logo-svg {
+  width: 38px;
+  height: 38px;
+  flex-shrink: 0;
+}
+
+.logo-text {
+  display: flex;
+  flex-direction: column;
+  line-height: 1;
+}
+
+.logo-name {
+  font-family: 'Syne', sans-serif;
+  font-weight: 800;
+  font-size: 22px;
+  letter-spacing: -0.5px;
+  color: var(--accent2);
+}
+
+.logo-name em {
+  font-style: normal;
+  color: var(--accent);
+}
+
+.logo-tagline {
+  font-size: 9px;
+  letter-spacing: 2px;
+  text-transform: uppercase;
+  color: var(--muted);
+  margin-top: 2px;
+}
+
+/* ─── HEADER ─── */
+.header {
+  background: linear-gradient(160deg, #0e2318 0%, #0b1a12 100%);
+  border-bottom: 1px solid var(--border);
+  padding: 16px 16px 14px;
+  position: sticky;
+  top: 0;
+  z-index: 100;
+}
+
+.header-top {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 12px;
+}
+
+.event-name {
+  font-family: 'Syne', sans-serif;
+  font-size: 12px;
+  color: var(--muted);
+  font-weight: 400;
+  cursor: pointer;
+  border-bottom: 1px dashed var(--border);
+  padding-bottom: 2px;
+  max-width: 140px;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.totals-bar {
+  display: grid;
+  grid-template-columns: 1fr 1fr 1fr;
+  gap: 8px;
+}
+
+.total-chip {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: 10px;
+  padding: 8px 10px;
+  text-align: center;
+}
+
+.total-chip .label {
+  font-size: 9px;
+  color: var(--muted);
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  margin-bottom: 2px;
+}
+
+.total-chip .value {
+  font-family: 'Syne', sans-serif;
+  font-weight: 700;
+  font-size: 14px;
+  color: var(--text);
+}
+
+.total-chip.highlight .value { color: var(--accent); font-size: 16px; }
+
+/* ─── SECTION ─── */
+.section { margin: 16px 12px 0; }
+
+.section-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 6px;
+  padding: 0 2px;
+}
+
+.section-title {
+  font-family: 'Syne', sans-serif;
+  font-weight: 700;
+  font-size: 12px;
+  color: var(--muted);
+  text-transform: uppercase;
+  letter-spacing: 1px;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.section-total {
+  font-family: 'Syne', sans-serif;
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--amber);
+}
+
+/* ─── ITEM CARD ─── */
+.item-card {
+  background: var(--card);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  padding: 11px 12px;
+  margin-bottom: 7px;
+}
+
+.item-row1 {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-bottom: 8px;
+}
+
+.item-emoji {
+  font-size: 22px;
+  width: 32px;
+  text-align: center;
+  flex-shrink: 0;
+  cursor: pointer;
+}
+
+.item-name-input {
+  flex: 1;
+  background: transparent;
+  border: none;
+  color: var(--text);
+  font-family: 'DM Sans', sans-serif;
+  font-size: 15px;
+  font-weight: 500;
+  outline: none;
+  caret-color: var(--accent);
+  min-width: 0;
+}
+
+.item-name-input::placeholder { color: var(--muted); }
+
+.btn-delete {
+  background: none;
+  border: none;
+  color: var(--muted);
+  font-size: 17px;
+  cursor: pointer;
+  padding: 4px;
+  border-radius: 6px;
+  line-height: 1;
+}
+
+.item-row2 {
+  display: grid;
+  grid-template-columns: 1fr 1fr 1fr;
+  gap: 6px;
+}
+
+.field-input {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  color: var(--text);
+  font-family: 'DM Sans', sans-serif;
+  font-size: 14px;
+  font-weight: 500;
+  padding: 7px 8px;
+  outline: none;
+  width: 100%;
+}
+
+.field-input:focus { border-color: var(--accent); }
+.field-input::placeholder { color: var(--border); }
+
+.subtotal-line {
+  text-align: right;
+  margin-top: 6px;
+  font-family: 'Syne', sans-serif;
+  font-size: 12px;
+  color: var(--amber);
+  min-height: 18px;
+}
+
+/* col header labels */
+.col-labels {
+  display: grid;
+  grid-template-columns: 1fr 1fr 1fr;
+  gap: 6px;
+  padding: 0 2px;
+  margin-bottom: 4px;
+}
+.col-lbl {
+  font-size: 9px;
+  color: var(--muted);
+  text-transform: uppercase;
+  letter-spacing: 0.4px;
+  padding-left: 8px;
+}
+
+/* ─── BUTTONS ─── */
+.btn-add-section {
+  width: 100%;
+  background: transparent;
+  border: 1.5px dashed var(--border);
+  border-radius: var(--radius);
+  color: var(--muted);
+  font-family: 'DM Sans', sans-serif;
+  font-size: 14px;
+  padding: 11px;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  margin-bottom: 6px;
+}
+
+.btn-add-section:active { background: rgba(61,184,122,0.08); border-color: var(--accent); color: var(--accent); }
+
+.btn-add-category {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  width: calc(100% - 24px);
+  margin: 12px 12px 0;
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  color: var(--muted);
+  font-family: 'DM Sans', sans-serif;
+  font-size: 14px;
+  padding: 13px;
+  cursor: pointer;
+}
+
+.btn-add-category:active { border-color: var(--accent); color: var(--accent); }
+
+.btn-delete-cat {
+  background: none;
+  border: none;
+  color: #3a5540;
+  font-size: 15px;
+  cursor: pointer;
+  padding: 2px 4px;
+}
+
+/* ─── BOTTOM BAR ─── */
+.bottom-bar {
+  position: fixed;
+  bottom: 0; left: 0; right: 0;
+  background: linear-gradient(180deg, transparent 0%, var(--bg) 28%);
+  padding: 10px 12px 22px;
+  display: flex;
+  gap: 8px;
+  z-index: 200;
+}
+
+.btn-share {
+  flex: 1;
+  background: var(--accent);
+  border: none;
+  border-radius: var(--radius);
+  color: #031a0b;
+  font-family: 'Syne', sans-serif;
+  font-size: 15px;
+  font-weight: 700;
+  padding: 16px;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+}
+
+.btn-share:active { background: #2e9e63; transform: scale(0.98); }
+
+.btn-settings {
+  background: var(--card);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  color: var(--muted);
+  font-size: 20px;
+  padding: 16px 18px;
+  cursor: pointer;
+}
+
+/* ─── MODAL ─── */
+.modal-overlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(0,0,0,0.78);
+  z-index: 500;
+  display: none;
+  align-items: flex-end;
+  backdrop-filter: blur(4px);
+}
+
+.modal-overlay.open { display: flex; }
+
+.modal {
+  background: var(--card);
+  border: 1px solid var(--border);
+  border-top: 1px solid #2d5a3e;
+  border-radius: 20px 20px 0 0;
+  width: 100%;
+  padding: 16px 16px 40px;
+  animation: slideUp 0.22s ease;
+}
+
+@keyframes slideUp { from { transform: translateY(100%); } to { transform: translateY(0); } }
+
+.modal-handle {
+  width: 40px; height: 4px;
+  background: var(--border);
+  border-radius: 2px;
+  margin: 0 auto 14px;
+}
+
+.modal-title {
+  font-family: 'Syne', sans-serif;
+  font-weight: 700;
+  font-size: 17px;
+  margin-bottom: 14px;
+  color: var(--text);
+}
+
+.modal-input {
+  width: 100%;
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: 10px;
+  color: var(--text);
+  font-family: 'DM Sans', sans-serif;
+  font-size: 16px;
+  padding: 13px 14px;
+  outline: none;
+  margin-bottom: 10px;
+}
+
+.modal-input:focus { border-color: var(--accent); }
+
+.modal-row { display: flex; gap: 8px; }
+
+.btn-modal-cancel {
+  flex: 1;
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: 12px;
+  color: var(--muted);
+  font-family: 'Syne', sans-serif;
+  font-size: 15px;
+  font-weight: 600;
+  padding: 14px;
+  cursor: pointer;
+}
+
+.btn-modal-ok {
+  flex: 2;
+  background: var(--accent);
+  border: none;
+  border-radius: 12px;
+  color: #031a0b;
+  font-family: 'Syne', sans-serif;
+  font-size: 15px;
+  font-weight: 700;
+  padding: 14px;
+  cursor: pointer;
+}
+
+/* share */
+.share-preview {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: 12px;
+  padding: 14px;
+  font-size: 13px;
+  line-height: 1.7;
+  color: var(--text);
+  white-space: pre-wrap;
+  margin-bottom: 12px;
+  max-height: 260px;
+  overflow-y: auto;
+  font-family: monospace;
+}
+
+.btn-copy {
+  width: 100%;
+  background: var(--accent);
+  border: none;
+  border-radius: 12px;
+  color: #031a0b;
+  font-family: 'Syne', sans-serif;
+  font-size: 15px;
+  font-weight: 700;
+  padding: 14px;
+  cursor: pointer;
+  margin-bottom: 8px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+}
+
+.btn-copy.copied { background: #2e9e63; }
+
+.btn-pdf {
+  width: 100%;
+  background: #102019;
+  border: 1.5px solid var(--accent);
+  border-radius: 12px;
+  color: var(--accent);
+  font-family: 'Syne', sans-serif;
+  font-size: 15px;
+  font-weight: 700;
+  padding: 14px;
+  cursor: pointer;
+  margin-bottom: 8px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+}
+.btn-pdf:active { background: rgba(61,184,122,0.15); }
+
+/* ─── LISTAS SALVAS ─── */
+.lists-modal .modal { max-height: 88vh; overflow-y: auto; }
+
+.slot-card {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: 12px;
+  padding: 11px 13px;
+  margin-bottom: 8px;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+.slot-card.active {
+  border-color: var(--accent);
+  background: rgba(61,184,122,0.06);
+}
+.slot-card.empty {
+  border-style: dashed;
+  opacity: 0.6;
+}
+.slot-info {
+  flex: 1;
+  min-width: 0;
+}
+.slot-name {
+  font-family: 'Syne', sans-serif;
+  font-weight: 700;
+  font-size: 14px;
+  color: var(--text);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+.slot-meta {
+  font-size: 11px;
+  color: var(--muted);
+  margin-top: 2px;
+}
+.slot-badge {
+  font-size: 10px;
+  font-family: 'Syne', sans-serif;
+  font-weight: 700;
+  background: var(--accent);
+  color: #031a0b;
+  border-radius: 6px;
+  padding: 2px 7px;
+  white-space: nowrap;
+}
+.slot-badge.empty-badge {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  color: var(--muted);
+}
+.slot-actions {
+  display: flex;
+  gap: 5px;
+}
+.btn-slot-action {
+  background: var(--card);
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  color: var(--muted);
+  font-size: 16px;
+  padding: 6px 9px;
+  cursor: pointer;
+  line-height: 1;
+}
+.btn-slot-action:active { background: rgba(61,184,122,0.12); color: var(--accent); }
+.btn-slot-load {
+  background: var(--accent);
+  border: none;
+  border-radius: 8px;
+  color: #031a0b;
+  font-family: 'Syne', sans-serif;
+  font-size: 12px;
+  font-weight: 700;
+  padding: 6px 10px;
+  cursor: pointer;
+}
+.btn-slot-load:active { background: #2e9e63; }
+.btn-slot-save-here {
+  background: var(--surface);
+  border: 1px solid var(--accent);
+  border-radius: 8px;
+  color: var(--accent);
+  font-family: 'Syne', sans-serif;
+  font-size: 12px;
+  font-weight: 700;
+  padding: 6px 10px;
+  cursor: pointer;
+}
+.btn-slot-save-here:active { background: rgba(61,184,122,0.12); }
+.slot-current-tag {
+  font-size: 9px;
+  background: rgba(61,184,122,0.15);
+  color: var(--accent);
+  border-radius: 4px;
+  padding: 1px 5px;
+  font-family: 'Syne', sans-serif;
+  font-weight: 700;
+  letter-spacing: 0.5px;
+}
+
+/* emoji */
+.emoji-picker {
+  display: grid;
+  grid-template-columns: repeat(6, 1fr);
+  gap: 8px;
+  margin-bottom: 12px;
+}
+
+.emoji-btn {
+  font-size: 24px;
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: 10px;
+  padding: 7px;
+  cursor: pointer;
+  text-align: center;
+}
+
+.emoji-btn:active { background: var(--bg); }
+
+/* config */
+.config-row { display: flex; flex-direction: column; gap: 5px; margin-bottom: 10px; }
+.config-label-text { font-size: 11px; color: var(--muted); text-transform: uppercase; letter-spacing: 0.5px; }
+
+/* ─── MARCA + OBS ─── */
+.item-row3 {
+  display: flex;
+  gap: 6px;
+  margin-top: 6px;
+  align-items: center;
+}
+
+.brand-input {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  color: var(--accent2);
+  font-family: 'DM Sans', sans-serif;
+  font-size: 12px;
+  font-weight: 500;
+  padding: 5px 8px;
+  outline: none;
+  width: 110px;
+  flex-shrink: 0;
+}
+.brand-input:focus { border-color: var(--accent); }
+.brand-input::placeholder { color: var(--border); font-style: italic; }
+
+.obs-input {
+  flex: 1;
+  background: transparent;
+  border: none;
+  border-bottom: 1px dashed var(--border);
+  border-radius: 0;
+  color: var(--muted);
+  font-family: 'DM Sans', sans-serif;
+  font-size: 12px;
+  padding: 5px 4px;
+  outline: none;
+  min-width: 0;
+}
+.obs-input:focus { border-bottom-color: var(--accent); color: var(--text); }
+.obs-input::placeholder { color: #2d4a35; }
+
+/* obs badge (indica que tem obs preenchida) */
+.obs-badge {
+  display: inline-block;
+  width: 6px; height: 6px;
+  background: var(--amber);
+  border-radius: 50%;
+  flex-shrink: 0;
+  opacity: 0;
+  transition: opacity 0.2s;
+}
+.obs-badge.has-content { opacity: 1; }
+
+/* ─── PESO / KG ─── */
+.item-row4 {
+  display: flex;
+  gap: 6px;
+  margin-top: 5px;
+  align-items: center;
+}
+
+.weight-label {
+  font-size: 10px;
+  color: var(--muted);
+  white-space: nowrap;
+  flex-shrink: 0;
+}
+
+.weight-input {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  color: var(--accent2);
+  font-family: 'DM Sans', sans-serif;
+  font-size: 12px;
+  font-weight: 500;
+  padding: 5px 8px;
+  outline: none;
+  width: 72px;
+  flex-shrink: 0;
+}
+.weight-input:focus { border-color: var(--accent); }
+.weight-input::placeholder { color: var(--border); }
+
+.weight-calc {
+  font-size: 11px;
+  color: var(--accent);
+  font-weight: 600;
+  font-family: 'Syne', sans-serif;
+  flex: 1;
+  text-align: right;
+  min-width: 0;
+}
+
+/* ─── MODAL DE CONFIRMAÇÃO DE SAÍDA ─── */
+#exitModal {
+  position: fixed;
+  inset: 0;
+  background: rgba(0,0,0,0.82);
+  z-index: 9999;
+  display: none;
+  align-items: center;
+  justify-content: center;
+  backdrop-filter: blur(6px);
+}
+#exitModal.open { display: flex; }
+
+.exit-box {
+  background: var(--card);
+  border: 1px solid var(--border);
+  border-top: 2px solid var(--danger);
+  border-radius: 20px;
+  padding: 28px 22px 22px;
+  width: calc(100% - 40px);
+  max-width: 340px;
+  animation: popIn 0.2s ease;
+  text-align: center;
+}
+
+@keyframes popIn { from { transform: scale(0.92); opacity:0; } to { transform: scale(1); opacity:1; } }
+
+.exit-icon { font-size: 36px; margin-bottom: 10px; }
+.exit-title {
+  font-family: 'Syne', sans-serif;
+  font-weight: 700;
+  font-size: 17px;
+  color: var(--text);
+  margin-bottom: 6px;
+}
+.exit-msg {
+  font-size: 13px;
+  color: var(--muted);
+  margin-bottom: 20px;
+  line-height: 1.5;
+}
+.exit-actions { display: flex; gap: 8px; flex-direction: column; }
+.btn-exit-save {
+  background: var(--accent);
+  border: none;
+  border-radius: 12px;
+  color: #031a0b;
+  font-family: 'Syne', sans-serif;
+  font-weight: 700;
+  font-size: 15px;
+  padding: 14px;
+  cursor: pointer;
+}
+.btn-exit-discard {
+  background: var(--surface);
+  border: 1px solid var(--danger);
+  border-radius: 12px;
+  color: var(--danger);
+  font-family: 'Syne', sans-serif;
+  font-weight: 600;
+  font-size: 14px;
+  padding: 12px;
+  cursor: pointer;
+}
+.btn-exit-cancel {
+  background: none;
+  border: none;
+  color: var(--muted);
+  font-size: 13px;
+  cursor: pointer;
+  padding: 8px;
+}
+
+/* save button */
+.btn-save {
+  background: var(--card);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  color: var(--accent);
+  font-size: 20px;
+  padding: 16px 18px;
+  cursor: pointer;
+  transition: background 0.15s;
+}
+.btn-save:active { background: rgba(61,184,122,0.15); }
+
+/* save toast */
+#saveToast {
+  position: fixed;
+  bottom: 96px;
+  left: 50%;
+  transform: translateX(-50%) translateY(10px);
+  background: var(--accent);
+  color: #031a0b;
+  font-family: 'Syne', sans-serif;
+  font-weight: 700;
+  font-size: 13px;
+  padding: 8px 18px;
+  border-radius: 20px;
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity 0.2s, transform 0.2s;
+  z-index: 999;
+  white-space: nowrap;
+}
+#saveToast.visible {
+  opacity: 1;
+  transform: translateX(-50%) translateY(0);
+}
+</style>
+</head>
+<body>
+
+<!-- HEADER -->
+<div class="header">
+  <div class="header-top">
+    <!-- LOGO -->
+    <div class="logo-wrap">
+      <svg class="logo-svg" viewBox="0 0 56 56" fill="none" xmlns="http://www.w3.org/2000/svg">
+        <!-- Outer circle arc (gold) -->
+        <path d="M 28 4 A 24 24 0 1 1 4 28" stroke="#f5a623" stroke-width="2.2" fill="none" stroke-linecap="round"/>
+        <!-- Circle base (dark green) -->
+        <circle cx="28" cy="28" r="22" fill="#0e3320" stroke="#234733" stroke-width="1"/>
+        <!-- Mountain peaks -->
+        <polygon points="10,40 20,22 26,30 32,18 44,40" fill="#1a6640"/>
+        <polygon points="20,40 26,30 32,40" fill="#22804e"/>
+        <polygon points="32,40 38,26 44,40" fill="#1c7548"/>
+        <!-- Trail/river path -->
+        <path d="M 22 40 Q 26 34 28 30 Q 30 36 34 40" fill="#d4b896" opacity="0.7"/>
+        <!-- Star/compass (gold) -->
+        <path d="M 28 9 L 29.2 12.5 L 32.5 12.5 L 30 14.5 L 31 18 L 28 16 L 25 18 L 26 14.5 L 23.5 12.5 L 26.8 12.5 Z" fill="#f5a623"/>
+        <!-- Leaf curl (lower right) -->
+        <path d="M 38 38 Q 46 30 42 22 Q 36 30 38 38 Z" fill="#2e9e63" opacity="0.85"/>
+      </svg>
+      <div class="logo-text">
+        <div class="logo-name">Na<em>tí</em>tur</div>
+        <div class="logo-tagline">natureza · viagens</div>
+      </div>
+    </div>
+    <div class="event-name" id="eventNameDisplay" onclick="openSettings()">Churrasco do Grupo</div>
+  </div>
+  <div class="totals-bar">
+    <div class="total-chip">
+      <div class="label">Itens</div>
+      <div class="value" id="totalItems">0</div>
+    </div>
+    <div class="total-chip">
+      <div class="label">Pessoas</div>
+      <div class="value" id="totalPeople">—</div>
+    </div>
+    <div class="total-chip highlight">
+      <div class="label">Total</div>
+      <div class="value" id="totalValue">R$ 0</div>
+    </div>
+  </div>
+  <div id="familyBar" style="display:none;margin-top:6px;background:rgba(245,166,35,0.12);border:1px solid rgba(245,166,35,0.3);border-radius:8px;padding:6px 10px;display:flex;align-items:center;justify-content:space-between;">
+    <span style="font-size:10px;color:#f5a623;text-transform:uppercase;letter-spacing:0.5px;">🏠 Por família (<span id="familyCount">—</span> famílias)</span>
+    <span style="font-family:'Syne',sans-serif;font-weight:700;font-size:15px;color:#f5a623;" id="familyValue">—</span>
+  </div>
+</div>
+
+<!-- CATEGORIAS (renderizadas uma vez, atualizadas cirurgicamente) -->
+<div id="categoriesContainer"></div>
+<button class="btn-add-category" onclick="openAddCategory()">＋ Nova categoria</button>
+
+<!-- BOTTOM BAR -->
+<div class="bottom-bar">
+  <button class="btn-settings" onclick="openSettings()">⚙️</button>
+  <button class="btn-save" id="btnSave" onclick="saveState()" title="Salvar">💾</button>
+  <button class="btn-settings" onclick="openLists()" title="Listas salvas" style="font-size:18px;">🗂️</button>
+  <button class="btn-share" onclick="openShare()">📤 Gerar resumo</button>
+</div>
+
+<!-- SAVE TOAST -->
+<div id="saveToast">✅ Salvo!</div>
+
+<!-- MODAL CONFIRMAÇÃO DE SAÍDA -->
+<div id="exitModal">
+  <div class="exit-box">
+    <div class="exit-icon">⚠️</div>
+    <div class="exit-title">Alterações não salvas</div>
+    <div class="exit-msg">Você tem mudanças que ainda não foram salvas. O que deseja fazer?</div>
+    <div class="exit-actions">
+      <button class="btn-exit-save" onclick="exitSaveAndLeave()">💾 Salvar e sair</button>
+      <button class="btn-exit-discard" onclick="exitDiscard()">🗑 Sair sem salvar</button>
+      <button class="btn-exit-cancel" onclick="exitCancel()">Voltar e continuar editando</button>
+    </div>
+  </div>
+</div>
+
+<!-- MODAL genérico -->
+<div class="modal-overlay" id="genericModal">
+  <div class="modal">
+    <div class="modal-handle"></div>
+    <div class="modal-title" id="genericModalTitle"></div>
+    <div id="genericModalContent"></div>
+  </div>
+</div>
+
+<!-- MODAL emoji -->
+<div class="modal-overlay" id="emojiModal">
+  <div class="modal">
+    <div class="modal-handle"></div>
+    <div class="modal-title">Escolher ícone</div>
+    <div class="emoji-picker" id="emojiPickerGrid"></div>
+    <div class="modal-row">
+      <button class="btn-modal-cancel" onclick="closeModal('emojiModal')">Cancelar</button>
+    </div>
+  </div>
+</div>
+
+<!-- MODAL share -->
+<div class="modal-overlay" id="shareModal">
+  <div class="modal">
+    <div class="modal-handle"></div>
+    <div class="modal-title">📋 Resumo para compartilhar</div>
+    <div class="share-preview" id="sharePreview"></div>
+    <button class="btn-copy" id="btnCopy" onclick="copyShare()">📋 Copiar tudo</button>
+    <button class="btn-pdf" onclick="exportPDF()">📄 Exportar PDF</button>
+    <div class="modal-row">
+      <button class="btn-modal-cancel" onclick="closeModal('shareModal')">Fechar</button>
+    </div>
+  </div>
+</div>
+
+<!-- MODAL listas salvas -->
+<div class="modal-overlay lists-modal" id="listsModal">
+  <div class="modal" style="padding-bottom:30px">
+    <div class="modal-handle"></div>
+    <div class="modal-title">🗂️ Listas salvas</div>
+    <div id="listsContainer"></div>
+    <div class="modal-row" style="margin-top:8px">
+      <button class="btn-modal-cancel" onclick="closeModal('listsModal')">Fechar</button>
+    </div>
+  </div>
+</div>
+
+<!-- MODAL configurações -->
+<div class="modal-overlay" id="settingsModal">
+  <div class="modal">
+    <div class="modal-handle"></div>
+    <div class="modal-title">⚙️ Configurações</div>
+    <div class="config-row">
+      <div class="config-label-text">Nome do evento</div>
+      <input class="modal-input" id="cfgEventName" placeholder="Ex: Churrasco Canastra" style="margin-bottom:0">
+    </div>
+    <div class="config-row">
+      <div class="config-label-text">Data do churrasco</div>
+      <input class="modal-input" id="cfgEventDate" type="date" placeholder="dd/mm/aaaa" style="margin-bottom:0">
+    </div>
+    <div class="modal-row" style="margin-bottom:10px">
+      <div style="flex:1">
+        <div class="config-label-text" style="margin-bottom:5px">Nº de pessoas</div>
+        <input class="modal-input" id="cfgPeople" type="number" placeholder="Ex: 37" style="margin-bottom:0">
+      </div>
+      <div style="flex:1">
+        <div class="config-label-text" style="margin-bottom:5px">Nº de famílias</div>
+        <input class="modal-input" id="cfgFamilies" type="number" placeholder="Ex: 10" style="margin-bottom:0">
+      </div>
+    </div>
+    <div class="config-row">
+      <div class="config-label-text">Rótulo coluna 1 (quantidade)</div>
+      <input class="modal-input" id="cfgCol1" placeholder="Qtd" style="margin-bottom:0">
+    </div>
+    <div class="config-row">
+      <div class="config-label-text">Rótulo coluna 2 (unidade)</div>
+      <input class="modal-input" id="cfgCol2" placeholder="Un" style="margin-bottom:0">
+    </div>
+    <div class="modal-row">
+      <button class="btn-modal-cancel" onclick="closeModal('settingsModal')">Cancelar</button>
+      <button class="btn-modal-ok" onclick="saveSettings()">Salvar</button>
+    </div>
+    <div style="margin-top:10px;text-align:center;">
+      <button onclick="confirmNewEvent()" style="background:none;border:none;color:var(--danger);font-size:12px;cursor:pointer;text-decoration:underline;padding:6px;">🗑 Limpar tudo / Novo evento</button>
+    </div>
+  </div>
+</div>
+
+<script>
+// ════════════════════════════════════════
+//  STATE
+// ════════════════════════════════════════
+function uid() { return Math.random().toString(36).slice(2,9); }
+
+// ─── PERSISTÊNCIA (localStorage) ───
+const STORAGE_KEY    = 'natitur_state_v1';
+const SLOTS_KEY      = 'natitur_slots_v1';   // array de 5 slots
+const CUR_SLOT_KEY   = 'natitur_cur_slot';   // índice do slot ativo
+const MAX_SLOTS      = 5;
+let _isDirty = false;
+let _currentSlot = null; // null = não vinculado a nenhum slot
+
+// ── Churrasco Canastra pré-carregado ──
+const CANASTRA_LIST = {
+  eventName: 'Churrasco Canastra',
+  people: '37',
+  families: '10',
+  eventDate: '23/05/2026',
+  col1Label: 'Qtd',
+  col2Label: 'Un',
+  savedAt: '23/05/2026',
+  categories: [
+    { id:'c1', emoji:'🥩', name:'Carnes', items:[
+      { id:'i1',  emoji:'🥩', name:'Picanha',                  col1:'2',   col2:'pç',  price:'157',  brand:'Friboi Matura',  obs:'Média de 1,6 kg a peça (99,90/kg)',  pesoMedio:'1.6',  precoKg:'99.9' },
+      { id:'i2',  emoji:'🍖', name:'Fraldinha',                col1:'1',   col2:'pç',  price:'64',   brand:'Friboi Matura',  obs:'Média de 0,9 kg a peça (69,90/kg)',  pesoMedio:'0.9',  precoKg:'69.9' },
+      { id:'i3',  emoji:'🌭', name:'Linguiça de Costela c/ Queijo coalho', col1:'4', col2:'pct', price:'29.9', brand:'Carapreta', obs:'420g cada pct', pesoMedio:'', precoKg:'' },
+      { id:'i4',  emoji:'🥩', name:'Lombo Suíno temperado',   col1:'3',   col2:'pç',  price:'33',   brand:'Suinco',         obs:'Média de 1,1 kg a peça (29,90/kg)', pesoMedio:'1.1',  precoKg:'29.9' },
+      { id:'i5',  emoji:'🥩', name:'Bananinha',               col1:'1',   col2:'pct', price:'52',   brand:'Friboi',         obs:'Média 1,1 kg o pacote',             pesoMedio:'1.1',  precoKg:'' },
+      { id:'i6',  emoji:'🥩', name:'Coraçãozinho',            col1:'2',   col2:'Kg',  price:'35',   brand:'',               obs:'',                                  pesoMedio:'',     precoKg:'' },
+      { id:'i7',  emoji:'🥩', name:'Maminha da Alcatra',      col1:'2',   col2:'pç',  price:'95',   brand:'Friboi 1953',    obs:'Média de 1,2kg a pç',               pesoMedio:'1.2',  precoKg:'' },
+    ]},
+    { id:'c2', emoji:'🥗', name:'Acompanhamentos', items:[
+      { id:'i8',  emoji:'🍞', name:'Pão de alho',             col1:'4',   col2:'pct', price:'24',   brand:'Beagô',          obs:'Tradicional, 4 queijos',            pesoMedio:'',     precoKg:'' },
+      { id:'i9',  emoji:'🍍', name:'Abacaxi',                 col1:'4',   col2:'Un',  price:'10.99',brand:'',               obs:'',                                  pesoMedio:'',     precoKg:'' },
+      { id:'i10', emoji:'🍋', name:'Limão Siciliano',         col1:'0.350',col2:'Kg', price:'9.9',  brand:'',               obs:'',                                  pesoMedio:'',     precoKg:'' },
+      { id:'i11', emoji:'🧀', name:'Queijo coalho',           col1:'3',   col2:'pct', price:'30',   brand:'Curral de Minas',obs:'Média de 0,33 kg o pacote (84,90/kg)',pesoMedio:'0.33',precoKg:'84.9'},
+      { id:'i12', emoji:'🍌', name:'Banana Caturra',          col1:'1.5', col2:'Kg',  price:'3.99', brand:'',               obs:'',                                  pesoMedio:'',     precoKg:'' },
+      { id:'i13', emoji:'🫙', name:'Leite Condensado',        col1:'2',   col2:'Un',  price:'',     brand:'',               obs:'',                                  pesoMedio:'',     precoKg:'' },
+      { id:'i14', emoji:'🫙', name:'Creme de Leite',          col1:'3',   col2:'Un',  price:'',     brand:'',               obs:'',                                  pesoMedio:'',     precoKg:'' },
+      { id:'i15', emoji:'🧀', name:'Queijo provolone',        col1:'1',   col2:'un',  price:'43',   brand:'Porto Alegre',   obs:'Média 0,5 kg a unidade (79,90/kg)', pesoMedio:'0.5',  precoKg:'79.9' },
+    ]},
+    { id:'c3', emoji:'🧻', name:'Utensílios e Insumos', items:[
+      { id:'i16', emoji:'🧻', name:'Papel toalha',            col1:'1',   col2:'pct', price:'15',   brand:'Scala',          obs:'3 rolos por pacote',                pesoMedio:'',     precoKg:'' },
+      { id:'i17', emoji:'🧴', name:'Álcool em gel para limpeza', col1:'1',col2:'Un', price:'9',    brand:'Gelálcool',      obs:'',                                  pesoMedio:'',     precoKg:'' },
+    ]},
+  ]
+};
+
+function getSlotsRaw() {
+  try {
+    const raw = localStorage.getItem(SLOTS_KEY);
+    if (!raw) return [];
+    return JSON.parse(raw);
+  } catch(e) { return []; }
+}
+
+function saveSlotsRaw(slots) {
+  try { localStorage.setItem(SLOTS_KEY, JSON.stringify(slots)); } catch(e) { console.warn(e); }
+}
+
+// Inicializa slots com Canastra no slot 0 se ainda não existir
+function initSlots() {
+  let slots = getSlotsRaw();
+  if (slots.length === 0) {
+    // Primeira vez: pré-carrega Canastra no slot 0
+    slots = [JSON.parse(JSON.stringify(CANASTRA_LIST)), null, null, null, null];
+    saveSlotsRaw(slots);
+  } else {
+    // Garante sempre 5 slots
+    while (slots.length < MAX_SLOTS) slots.push(null);
+    saveSlotsRaw(slots);
+  }
+}
+
+function saveToSlot(idx) {
+  const slots = getSlotsRaw();
+  const snapshot = JSON.parse(JSON.stringify(state));
+  snapshot.savedAt = new Date().toLocaleDateString('pt-BR');
+  slots[idx] = snapshot;
+  saveSlotsRaw(slots);
+  localStorage.setItem(CUR_SLOT_KEY, String(idx));
+  _currentSlot = idx;
+  _isDirty = false;
+  showSaveToast();
+  renderListsModal();
+}
+
+function loadFromSlot(idx) {
+  const slots = getSlotsRaw();
+  const slot = slots[idx];
+  if (!slot) return;
+  // Garante campos novos em itens antigos
+  slot.categories.forEach(cat => {
+    cat.items.forEach(item => {
+      if (item.pesoMedio === undefined) item.pesoMedio = '';
+      if (item.precoKg === undefined)   item.precoKg   = '';
+    });
+  });
+  if (slot.families === undefined) slot.families = '';
+  if (slot.eventDate === undefined) slot.eventDate = '';
+  Object.assign(state, JSON.parse(JSON.stringify(slot)));
+  localStorage.setItem(CUR_SLOT_KEY, String(idx));
+  _currentSlot = idx;
+  _isDirty = false;
+  closeModal('listsModal');
+  render();
+  recalcTotals();
+  showToast(`✅ "${state.eventName}" carregado!`);
+}
+
+function deleteSlot(idx) {
+  const slots = getSlotsRaw();
+  const name = slots[idx] ? slots[idx].eventName : '';
+  if (!confirm(`Apagar "${name}" do slot ${idx+1}?`)) return;
+  slots[idx] = null;
+  saveSlotsRaw(slots);
+  if (_currentSlot === idx) { _currentSlot = null; localStorage.removeItem(CUR_SLOT_KEY); }
+  renderListsModal();
+}
+
+function openSaveToSlotDialog(idx) {
+  const slots = getSlotsRaw();
+  const existing = slots[idx];
+  const msg = existing
+    ? `Substituir "${existing.eventName}" pelo evento atual "${state.eventName}"?`
+    : `Salvar "${state.eventName}" no slot ${idx+1}?`;
+  if (confirm(msg)) saveToSlot(idx);
+}
+
+function renderListsModal() {
+  const slots = getSlotsRaw();
+  const container = document.getElementById('listsContainer');
+  if (!container) return;
+  container.innerHTML = '';
+
+  slots.forEach((slot, idx) => {
+    const card = document.createElement('div');
+    card.className = 'slot-card' + (!slot ? ' empty' : '') + (_currentSlot === idx ? ' active' : '');
+
+    const numBadge = document.createElement('div');
+    numBadge.style.cssText = 'font-family:Syne,sans-serif;font-weight:800;font-size:18px;color:var(--muted);width:22px;flex-shrink:0;text-align:center;';
+    numBadge.textContent = idx + 1;
+
+    const info = document.createElement('div');
+    info.className = 'slot-info';
+
+    if (slot) {
+      // Calcula total
+      let total = 0;
+      slot.categories.forEach(cat => cat.items.forEach(item => {
+        total += (parseFloat(item.col1)||0) * (parseFloat(item.price)||0);
+      }));
+      const totalStr = total > 0 ? `R$ ${total.toFixed(2).replace('.',',')}` : 'sem valores';
+      const items = slot.categories.reduce((s,c) => s + c.items.length, 0);
+
+      const nameEl = document.createElement('div');
+      nameEl.className = 'slot-name';
+      nameEl.textContent = slot.eventName || 'Sem nome';
+
+      const metaEl = document.createElement('div');
+      metaEl.className = 'slot-meta';
+      metaEl.textContent = `${items} itens · ${totalStr}${slot.people ? ' · '+slot.people+' pessoas' : ''}`;
+      if (slot.savedAt) metaEl.textContent += ` · salvo ${slot.savedAt}`;
+
+      info.appendChild(nameEl);
+      info.appendChild(metaEl);
+
+      if (_currentSlot === idx) {
+        const tag = document.createElement('span');
+        tag.className = 'slot-current-tag';
+        tag.textContent = 'ATIVO';
+        info.appendChild(document.createTextNode(' '));
+        nameEl.appendChild(document.createTextNode(' '));
+        nameEl.appendChild(tag);
+      }
+    } else {
+      const emptyEl = document.createElement('div');
+      emptyEl.className = 'slot-name';
+      emptyEl.style.color = 'var(--muted)';
+      emptyEl.textContent = 'Slot vazio';
+      info.appendChild(emptyEl);
+    }
+
+    const actions = document.createElement('div');
+    actions.className = 'slot-actions';
+
+    if (slot) {
+      const loadBtn = document.createElement('button');
+      loadBtn.className = 'btn-slot-load';
+      loadBtn.textContent = '📂';
+      loadBtn.title = 'Carregar lista';
+      loadBtn.onclick = () => {
+        if (_isDirty) {
+          showExitModal(() => loadFromSlot(idx));
+        } else {
+          loadFromSlot(idx);
+        }
+      };
+
+      const saveHereBtn = document.createElement('button');
+      saveHereBtn.className = 'btn-slot-save-here';
+      saveHereBtn.textContent = '💾';
+      saveHereBtn.title = 'Salvar lista atual aqui';
+      saveHereBtn.onclick = () => openSaveToSlotDialog(idx);
+
+      const delBtn = document.createElement('button');
+      delBtn.className = 'btn-slot-action';
+      delBtn.textContent = '🗑';
+      delBtn.title = 'Apagar slot';
+      delBtn.onclick = () => deleteSlot(idx);
+
+      actions.appendChild(loadBtn);
+      actions.appendChild(saveHereBtn);
+      actions.appendChild(delBtn);
+    } else {
+      const saveHereBtn = document.createElement('button');
+      saveHereBtn.className = 'btn-slot-save-here';
+      saveHereBtn.textContent = '💾 Salvar aqui';
+      saveHereBtn.onclick = () => saveToSlot(idx);
+      actions.appendChild(saveHereBtn);
+    }
+
+    card.appendChild(numBadge);
+    card.appendChild(info);
+    card.appendChild(actions);
+    container.appendChild(card);
+  });
+}
+
+function openLists() {
+  renderListsModal();
+  document.getElementById('listsModal').classList.add('open');
+}
+
+function showToast(msg) {
+  let toast = document.getElementById('saveToast');
+  if (!toast) return;
+  toast.textContent = msg;
+  toast.classList.add('visible');
+  clearTimeout(toast._timer);
+  toast._timer = setTimeout(() => { toast.classList.remove('visible'); toast.textContent = '✅ Salvo!'; }, 2200);
+}
+
+function saveState() {
+  try {
+    localStorage.setItem(STORAGE_KEY, JSON.stringify(state));
+    // Se tem slot ativo, salva lá também
+    if (_currentSlot !== null) {
+      const slots = getSlotsRaw();
+      const snapshot = JSON.parse(JSON.stringify(state));
+      snapshot.savedAt = new Date().toLocaleDateString('pt-BR');
+      slots[_currentSlot] = snapshot;
+      saveSlotsRaw(slots);
+    }
+    _isDirty = false;
+    showSaveToast();
+  } catch(e) { console.warn('Erro ao salvar:', e); }
+}
+
+function loadState() {
+  try {
+    const raw = localStorage.getItem(STORAGE_KEY);
+    if (!raw) return false;
+    const saved = JSON.parse(raw);
+    Object.assign(state, saved);
+    // Restaura slot ativo
+    const cur = localStorage.getItem(CUR_SLOT_KEY);
+    if (cur !== null) _currentSlot = parseInt(cur);
+    return true;
+  } catch(e) { return false; }
+}
+
+function clearState() {
+  localStorage.removeItem(STORAGE_KEY);
+  localStorage.removeItem(CUR_SLOT_KEY);
+  _isDirty = false;
+  _currentSlot = null;
+}
+
+function showSaveToast() {
+  let toast = document.getElementById('saveToast');
+  if (!toast) return;
+  toast.classList.add('visible');
+  clearTimeout(toast._timer);
+  toast._timer = setTimeout(() => toast.classList.remove('visible'), 1800);
+}
+
+function markDirty() {
+  _isDirty = true;
+}
+
+// ─── PROTEÇÃO CONTRA FECHAMENTO (modal customizado) ───
+let _exitCallback = null; // guarda o callback de saída pendente
+
+function showExitModal(onLeave) {
+  _exitCallback = onLeave;
+  document.getElementById('exitModal').classList.add('open');
+}
+
+function exitSaveAndLeave() {
+  saveState();
+  document.getElementById('exitModal').classList.remove('open');
+  if (_exitCallback) { _exitCallback(); _exitCallback = null; }
+}
+
+function exitDiscard() {
+  _isDirty = false;
+  document.getElementById('exitModal').classList.remove('open');
+  if (_exitCallback) { _exitCallback(); _exitCallback = null; }
+}
+
+function exitCancel() {
+  document.getElementById('exitModal').classList.remove('open');
+  _exitCallback = null;
+}
+
+// beforeunload como fallback (para fechar aba pelo X do browser)
+window.addEventListener('beforeunload', e => {
+  if (_isDirty) {
+    e.preventDefault();
+    e.returnValue = '';
+  }
+});
+
+const state = {
+  eventName: 'Churrasco do Grupo',
+  people: '',
+  families: '',
+  eventDate: '',
+  col1Label: 'Qtd',
+  col2Label: 'Un',
+  categories: [
+    { id: uid(), emoji:'🥩', name:'Carnes', items:[
+      { id:uid(), emoji:'🥩', name:'Picanha',   col1:'', col2:'kg', price:'', brand:'', obs:'', pesoMedio:'', precoKg:'' },
+      { id:uid(), emoji:'🍖', name:'Fraldinha',  col1:'', col2:'kg', price:'', brand:'', obs:'', pesoMedio:'', precoKg:'' },
+      { id:uid(), emoji:'🌭', name:'Linguiça',   col1:'', col2:'kg', price:'', brand:'', obs:'', pesoMedio:'', precoKg:'' },
+    ]},
+    { id: uid(), emoji:'🥗', name:'Acompanhamentos', items:[
+      { id:uid(), emoji:'🍞', name:'Pão de alho', col1:'', col2:'un', price:'', brand:'', obs:'', pesoMedio:'', precoKg:'' },
+      { id:uid(), emoji:'🫙', name:'Farofa',       col1:'', col2:'kg', price:'', brand:'', obs:'', pesoMedio:'', precoKg:'' },
+    ]},
+    { id: uid(), emoji:'🍺', name:'Bebidas', items:[
+      { id:uid(), emoji:'🍺', name:'Cerveja',      col1:'', col2:'cx', price:'', brand:'', obs:'', pesoMedio:'', precoKg:'' },
+      { id:uid(), emoji:'🥤', name:'Refrigerante', col1:'', col2:'L',  price:'', brand:'', obs:'', pesoMedio:'', precoKg:'' },
+    ]},
+  ]
+};
+
+let pendingEmojiTarget = null;
+
+// ════════════════════════════════════════
+//  FULL RENDER (called only on structural changes)
+// ════════════════════════════════════════
+function render() {
+  const container = document.getElementById('categoriesContainer');
+  container.innerHTML = '';
+
+  state.categories.forEach(cat => {
+    const section = document.createElement('div');
+    section.className = 'section';
+    section.dataset.catId = cat.id;
+
+    // — header —
+    const hdr = document.createElement('div');
+    hdr.className = 'section-header';
+
+    const titleWrap = document.createElement('div');
+    titleWrap.className = 'section-title';
+
+    const emojiSpan = document.createElement('span');
+    emojiSpan.style.cssText = 'cursor:pointer;font-size:16px';
+    emojiSpan.textContent = cat.emoji;
+    emojiSpan.onclick = () => pickEmoji('category', cat.id);
+
+    const nameSpan = document.createElement('span');
+    nameSpan.contentEditable = 'true';
+    nameSpan.style.cssText = 'outline:none;min-width:40px';
+    nameSpan.textContent = cat.name;
+    nameSpan.onblur = () => { cat.name = nameSpan.textContent.trim() || cat.name; markDirty(); };
+
+    titleWrap.appendChild(emojiSpan);
+    titleWrap.appendChild(nameSpan);
+
+    const right = document.createElement('div');
+    right.style.cssText = 'display:flex;align-items:center;gap:6px;';
+
+    const secTotal = document.createElement('div');
+    secTotal.className = 'section-total';
+    secTotal.id = 'st_' + cat.id;
+
+    const delCat = document.createElement('button');
+    delCat.className = 'btn-delete-cat';
+    delCat.textContent = '🗑';
+    delCat.onclick = () => {
+      if (!cat.items.length || confirm(`Remover "${cat.name}"?`)) {
+        state.categories = state.categories.filter(c => c.id !== cat.id);
+        render(); recalcTotals(); markDirty();
+      }
+    };
+
+    right.appendChild(secTotal);
+    right.appendChild(delCat);
+    hdr.appendChild(titleWrap);
+    hdr.appendChild(right);
+    section.appendChild(hdr);
+
+    // — col labels —
+    const colLbls = document.createElement('div');
+    colLbls.className = 'col-labels';
+    colLbls.innerHTML = `<div class="col-lbl">${state.col1Label}</div><div class="col-lbl">${state.col2Label}</div><div class="col-lbl">R$ unit.</div>`;
+    section.appendChild(colLbls);
+
+    // — items —
+    cat.items.forEach(item => {
+      section.appendChild(buildItemCard(cat.id, item));
+    });
+
+    // — add item btn —
+    const addBtn = document.createElement('button');
+    addBtn.className = 'btn-add-section';
+    addBtn.textContent = '＋ Adicionar item';
+    addBtn.onclick = () => addItem(cat.id);
+    section.appendChild(addBtn);
+
+    container.appendChild(section);
+  });
+
+  recalcTotals();
+}
+
+// ════════════════════════════════════════
+//  BUILD ITEM CARD (no inline oninput that triggers render)
+// ════════════════════════════════════════
+function buildItemCard(catId, item) {
+  const card = document.createElement('div');
+  card.className = 'item-card';
+  card.dataset.itemId = item.id;
+
+  // row 1
+  const row1 = document.createElement('div');
+  row1.className = 'item-row1';
+
+  const emojiDiv = document.createElement('div');
+  emojiDiv.className = 'item-emoji';
+  emojiDiv.textContent = item.emoji || '📦';
+  emojiDiv.onclick = () => pickEmoji('item', catId, item.id);
+
+  const nameInp = document.createElement('input');
+  nameInp.className = 'item-name-input';
+  nameInp.placeholder = 'Nome do item';
+  nameInp.value = item.name;
+  nameInp.oninput = () => { item.name = nameInp.value; markDirty(); };
+
+  const delBtn = document.createElement('button');
+  delBtn.className = 'btn-delete';
+  delBtn.textContent = '✕';
+  delBtn.onclick = () => {
+    const cat = state.categories.find(c => c.id === catId);
+    cat.items = cat.items.filter(i => i.id !== item.id);
+    card.remove();
+    recalcTotals();
+    markDirty();
+  };
+
+  row1.appendChild(emojiDiv);
+  row1.appendChild(nameInp);
+  row1.appendChild(delBtn);
+
+  // row 2
+  const row2 = document.createElement('div');
+  row2.className = 'item-row2';
+
+  const inp1 = document.createElement('input');
+  inp1.className = 'field-input';
+  inp1.type = 'number';
+  inp1.inputMode = 'decimal';
+  inp1.placeholder = '0';
+  inp1.value = item.col1;
+  inp1.oninput = () => { item.col1 = inp1.value; updateSubtotal(card, item); recalcTotals(); markDirty(); };
+
+  const inp2 = document.createElement('input');
+  inp2.className = 'field-input';
+  inp2.placeholder = state.col2Label;
+  inp2.value = item.col2;
+  inp2.oninput = () => { item.col2 = inp2.value; markDirty(); };
+
+  const inp3 = document.createElement('input');
+  inp3.className = 'field-input';
+  inp3.type = 'number';
+  inp3.inputMode = 'decimal';
+  inp3.placeholder = '0,00';
+  inp3.value = item.price;
+  inp3.oninput = () => { item.price = inp3.value; updateSubtotal(card, item); recalcTotals(); markDirty(); };
+
+  row2.appendChild(inp1);
+  row2.appendChild(inp2);
+  row2.appendChild(inp3);
+
+  // subtotal line
+  const subLine = document.createElement('div');
+  subLine.className = 'subtotal-line';
+  subLine.id = 'sub_' + item.id;
+
+  // row 3 — marca + obs
+  const row3 = document.createElement('div');
+  row3.className = 'item-row3';
+
+  const brandInp = document.createElement('input');
+  brandInp.className = 'brand-input';
+  brandInp.placeholder = '🏷 Marca';
+  brandInp.value = item.brand || '';
+  brandInp.oninput = () => { item.brand = brandInp.value; markDirty(); };
+
+  const obsBadge = document.createElement('span');
+  obsBadge.className = 'obs-badge' + (item.obs ? ' has-content' : '');
+
+  const obsInp = document.createElement('input');
+  obsInp.className = 'obs-input';
+  obsInp.placeholder = 'Observação…';
+  obsInp.value = item.obs || '';
+  obsInp.oninput = () => {
+    item.obs = obsInp.value;
+    obsBadge.classList.toggle('has-content', !!obsInp.value);
+    markDirty();
+  };
+
+  row3.appendChild(brandInp);
+  row3.appendChild(obsBadge);
+  row3.appendChild(obsInp);
+
+  // row 4 — peso médio + preço/kg (opcional)
+  const row4 = document.createElement('div');
+  row4.className = 'item-row4';
+
+  const weightLabel = document.createElement('span');
+  weightLabel.className = 'weight-label';
+  weightLabel.textContent = '⚖️ Peso médio:';
+
+  const pesoInp = document.createElement('input');
+  pesoInp.className = 'weight-input';
+  pesoInp.type = 'number';
+  pesoInp.inputMode = 'decimal';
+  pesoInp.placeholder = 'kg';
+  pesoInp.value = item.pesoMedio || '';
+  pesoInp.title = 'Peso médio por unidade (kg)';
+
+  const kgLabel = document.createElement('span');
+  kgLabel.className = 'weight-label';
+  kgLabel.textContent = 'R$/kg:';
+
+  const kgInp = document.createElement('input');
+  kgInp.className = 'weight-input';
+  kgInp.type = 'number';
+  kgInp.inputMode = 'decimal';
+  kgInp.placeholder = '0,00';
+  kgInp.value = item.precoKg || '';
+  kgInp.title = 'Preço por kg';
+
+  const calcSpan = document.createElement('span');
+  calcSpan.className = 'weight-calc';
+
+  function updateWeightCalc() {
+    item.pesoMedio = pesoInp.value;
+    item.precoKg   = kgInp.value;
+    const pm = parseFloat(item.pesoMedio) || 0;
+    const pk = parseFloat(item.precoKg) || 0;
+    if (pm > 0 && pk > 0) {
+      const unitPrice = pm * pk;
+      calcSpan.textContent = `≈ R$ ${unitPrice.toFixed(2).replace('.',',')} /un`;
+      // auto-fill price field if empty
+      if (!item.price) {
+        item.price = unitPrice.toFixed(2);
+        inp3.value = item.price;
+        updateSubtotal(card, item);
+        recalcTotals();
+      }
+    } else {
+      calcSpan.textContent = '';
+    }
+    markDirty();
+  }
+
+  pesoInp.oninput = updateWeightCalc;
+  kgInp.oninput   = updateWeightCalc;
+
+  // init display
+  const pm0 = parseFloat(item.pesoMedio) || 0;
+  const pk0 = parseFloat(item.precoKg) || 0;
+  if (pm0 > 0 && pk0 > 0) calcSpan.textContent = `≈ R$ ${(pm0*pk0).toFixed(2).replace('.',',')} /un`;
+
+  row4.appendChild(weightLabel);
+  row4.appendChild(pesoInp);
+  row4.appendChild(kgLabel);
+  row4.appendChild(kgInp);
+  row4.appendChild(calcSpan);
+
+  card.appendChild(row1);
+  card.appendChild(row2);
+  card.appendChild(subLine);
+  card.appendChild(row3);
+  card.appendChild(row4);
+
+  updateSubtotal(card, item);
+  return card;
+}
+
+// ════════════════════════════════════════
+//  SURGICAL UPDATES (no DOM rebuild)
+// ════════════════════════════════════════
+function updateSubtotal(card, item) {
+  const q = parseFloat(item.col1) || 0;
+  const p = parseFloat(item.price) || 0;
+  const sub = q * p;
+  const el = card.querySelector('.subtotal-line');
+  if (el) el.textContent = sub > 0 ? `= R$ ${sub.toFixed(2).replace('.',',')}` : '';
+}
+
+function recalcTotals() {
+  let totalItems = 0;
+  let grand = 0;
+
+  state.categories.forEach(cat => {
+    let catTotal = 0;
+    cat.items.forEach(item => {
+      const q = parseFloat(item.col1) || 0;
+      const p = parseFloat(item.price) || 0;
+      catTotal += q * p;
+      totalItems++;
+    });
+    grand += catTotal;
+    const el = document.getElementById('st_' + cat.id);
+    if (el) el.textContent = catTotal > 0 ? `R$ ${catTotal.toFixed(2).replace('.',',')}` : '';
+  });
+
+  document.getElementById('totalItems').textContent = totalItems;
+  document.getElementById('totalPeople').textContent = state.people || '—';
+  document.getElementById('totalValue').textContent = `R$ ${grand.toFixed(2).replace('.',',')}`;
+  document.getElementById('eventNameDisplay').textContent = state.eventName;
+
+  // Family bar
+  const famBar = document.getElementById('familyBar');
+  const famCount = parseInt(state.families) || 0;
+  if (famBar) {
+    if (famCount > 0 && grand > 0) {
+      famBar.style.display = 'flex';
+      document.getElementById('familyCount').textContent = famCount;
+      document.getElementById('familyValue').textContent = `R$ ${(grand / famCount).toFixed(2).replace('.',',')}`;
+    } else {
+      famBar.style.display = 'none';
+    }
+  }
+}
+
+// ════════════════════════════════════════
+//  MUTATIONS
+// ════════════════════════════════════════
+function addItem(catId) {
+  const cat = state.categories.find(c => c.id === catId);
+  const item = { id: uid(), emoji: '📦', name: '', col1: '', col2: state.col2Label, price: '', brand: '', obs: '', pesoMedio: '', precoKg: '' };
+  cat.items.push(item);
+
+  // insert card before the add button
+  const section = document.querySelector(`.section[data-cat-id="${catId}"]`);
+  const addBtn = section.querySelector('.btn-add-section');
+  const card = buildItemCard(catId, item);
+  section.insertBefore(card, addBtn);
+
+  recalcTotals();
+  markDirty();
+  setTimeout(() => card.querySelector('.item-name-input').focus(), 30);
+}
+
+// ════════════════════════════════════════
+//  EMOJI PICKER
+// ════════════════════════════════════════
+const EMOJIS = [
+  // Carnes
+  '🥩','🍖','🌭','🍗','🥓','🫀','🐄','🐖','🐔',
+  // Frutos do mar / proteína
+  '🦐','🦑','🐟','🥚',
+  // Queijos e laticínios
+  '🧀','🥛','🫙',
+  // Acompanhamentos / vegetais
+  '🥗','🍞','🥬','🧅','🧄','🫑','🌽','🍅','🥑','🫒','🧆','🥔','🥕','🍄',
+  // Frutas
+  '🍋','🍌','🍍','🍉','🍑','🍇','🫐','🍓','🍊','🍎',
+  // Bebidas
+  '🍺','🍻','🥂','🍷','🥤','🧃','💧','🧊','☕','🧉',
+  // Doces / sobremesa
+  '🍫','🍬','🍮','🍨','🍰','🎂',
+  // Condimentos / temperos
+  '🧂','🌶️','🫙','🍯','🥫',
+  // Utensílios / insumos / outros
+  '🛒','🔥','🧴','🧻','🪣','🧹','🧽','🪥','🔦','🧯',
+  // Categorias gerais
+  '🫕','🥘','🍲','🧆','🫔','🌮','🥙','🍱','🛍️','📦','💰','⭐',
+];
+
+function pickEmoji(type, catId, itemId) {
+  pendingEmojiTarget = { type, catId, itemId };
+  const grid = document.getElementById('emojiPickerGrid');
+  grid.innerHTML = EMOJIS.map(e => `<button class="emoji-btn" onclick="selectEmoji('${e}')">${e}</button>`).join('');
+  document.getElementById('emojiModal').classList.add('open');
+}
+
+function pickEmojiForNew() {
+  pendingEmojiTarget = { type: 'new' };
+  const grid = document.getElementById('emojiPickerGrid');
+  grid.innerHTML = EMOJIS.map(e => `<button class="emoji-btn" onclick="selectEmoji('${e}')">${e}</button>`).join('');
+  document.getElementById('emojiModal').classList.add('open');
+}
+
+function selectEmoji(emoji) {
+  if (!pendingEmojiTarget) return;
+  const t = pendingEmojiTarget;
+
+  if (t.type === 'new') {
+    const el = document.getElementById('newCatEmoji');
+    if (el) el.textContent = emoji;
+  } else if (t.type === 'category') {
+    const cat = state.categories.find(c => c.id === t.catId);
+    if (cat) {
+      cat.emoji = emoji;
+      // update just the emoji span
+      const section = document.querySelector(`.section[data-cat-id="${t.catId}"]`);
+      if (section) section.querySelector('.section-title span').textContent = emoji;
+    }
+  } else if (t.type === 'item') {
+    const cat = state.categories.find(c => c.id === t.catId);
+    if (cat) {
+      const item = cat.items.find(i => i.id === t.itemId);
+      if (item) {
+        item.emoji = emoji;
+        const card = document.querySelector(`.item-card[data-item-id="${t.itemId}"]`);
+        if (card) card.querySelector('.item-emoji').textContent = emoji;
+      }
+    }
+  }
+
+  pendingEmojiTarget = null;
+  closeModal('emojiModal');
+  markDirty();
+}
+
+// ════════════════════════════════════════
+//  ADD CATEGORY MODAL
+// ════════════════════════════════════════
+function openAddCategory() {
+  document.getElementById('genericModalTitle').textContent = 'Nova categoria';
+  document.getElementById('genericModalContent').innerHTML = `
+    <div style="display:flex;gap:10px;align-items:center;margin-bottom:12px;">
+      <div id="newCatEmoji" style="font-size:30px;cursor:pointer;background:var(--surface);border:1px solid var(--border);border-radius:10px;padding:8px 12px;" onclick="pickEmojiForNew()">🍽️</div>
+      <input class="modal-input" id="newCatName" placeholder="Nome da categoria" style="margin-bottom:0;flex:1" autofocus>
+    </div>
+    <div class="modal-row">
+      <button class="btn-modal-cancel" onclick="closeModal('genericModal')">Cancelar</button>
+      <button class="btn-modal-ok" onclick="confirmAddCategory()">Adicionar</button>
+    </div>
+  `;
+  document.getElementById('genericModal').classList.add('open');
+}
+
+function confirmAddCategory() {
+  const name = document.getElementById('newCatName').value.trim();
+  const emoji = document.getElementById('newCatEmoji').textContent;
+  if (!name) return;
+  state.categories.push({ id: uid(), emoji, name, items: [] });
+  closeModal('genericModal');
+  render();
+  markDirty();
+}
+
+// ════════════════════════════════════════
+//  SETTINGS
+// ════════════════════════════════════════
+function openSettings() {
+  document.getElementById('cfgEventName').value = state.eventName;
+  document.getElementById('cfgEventDate').value = state.eventDate || '';
+  document.getElementById('cfgPeople').value = state.people;
+  document.getElementById('cfgFamilies').value = state.families || '';
+  document.getElementById('cfgCol1').value = state.col1Label;
+  document.getElementById('cfgCol2').value = state.col2Label;
+  document.getElementById('settingsModal').classList.add('open');
+}
+
+function saveSettings() {
+  state.eventName = document.getElementById('cfgEventName').value.trim() || state.eventName;
+  state.eventDate = document.getElementById('cfgEventDate').value.trim();
+  state.people    = document.getElementById('cfgPeople').value.trim();
+  state.families  = document.getElementById('cfgFamilies').value.trim();
+  state.col1Label = document.getElementById('cfgCol1').value.trim() || 'Qtd';
+  state.col2Label = document.getElementById('cfgCol2').value.trim() || 'Un';
+  closeModal('settingsModal');
+  recalcTotals(); // just refresh header labels
+  // refresh col label rows
+  document.querySelectorAll('.col-labels').forEach(el => {
+    el.innerHTML = `<div class="col-lbl">${state.col1Label}</div><div class="col-lbl">${state.col2Label}</div><div class="col-lbl">R$ unit.</div>`;
+  });
+  markDirty();
+}
+
+// ════════════════════════════════════════
+//  SHARE
+// ════════════════════════════════════════
+function buildShareText() {
+  let eventDateDisplay = '';
+  if (state.eventDate) {
+    const parts = state.eventDate.split('-');
+    if (parts.length === 3) eventDateDisplay = `${parts[2]}/${parts[1]}/${parts[0]}`;
+    else eventDateDisplay = state.eventDate;
+  } else {
+    eventDateDisplay = new Date().toLocaleDateString('pt-BR');
+  }
+  let text = `🌿 *Natitur* — ${state.eventName}\n`;
+  text += `📅 ${eventDateDisplay}`;
+  if (state.people) text += ` | 👥 ${state.people} pessoas`;
+  if (state.families) text += ` | 🏠 ${state.families} famílias`;
+  text += `\n${'─'.repeat(30)}\n\n`;
+
+  let grand = 0;
+  state.categories.forEach(cat => {
+    let catTotal = 0;
+    text += `${cat.emoji} *${cat.name.toUpperCase()}*\n`;
+    cat.items.forEach(item => {
+      const q = parseFloat(item.col1) || 0;
+      const p = parseFloat(item.price) || 0;
+      const sub = q * p;
+      catTotal += sub;
+      let line = `  • ${item.name || '(sem nome)'}`;
+      if (item.brand) line += ` [${item.brand}]`;
+      if (item.col1) line += `  ${item.col1}${item.col2 ? ' '+item.col2 : ''}`;
+      if (item.pesoMedio) line += `  ~${item.pesoMedio}kg/un`;
+      if (item.precoKg)  line += `  (R$${parseFloat(item.precoKg).toFixed(2).replace('.',',')}/kg)`;
+      if (item.price) line += `  × R$${p.toFixed(2).replace('.',',')}`;
+      if (sub > 0) line += `  = *R$${sub.toFixed(2).replace('.',',')}*`;
+      if (item.obs) line += `\n    _(${item.obs})_`;
+      text += line + '\n';
+    });
+    if (catTotal > 0) { text += `  Subtotal: R$${catTotal.toFixed(2).replace('.',',')}\n`; grand += catTotal; }
+    text += '\n';
+  });
+
+  text += `${'─'.repeat(30)}\n`;
+  text += `💰 *TOTAL: R$ ${grand.toFixed(2).replace('.',',')}*`;
+  if (state.people && grand > 0) {
+    const per = grand / parseFloat(state.people);
+    text += `\n👤 Por pessoa: R$ ${per.toFixed(2).replace('.',',')}`;
+  }
+  if (state.families && grand > 0) {
+    const perFam = grand / parseFloat(state.families);
+    text += `\n🏠 Por família: R$ ${perFam.toFixed(2).replace('.',',')}`;
+  }
+  text += `\n\n✅ _Aprovam?_`;
+  return text;
+}
+
+function openShare() {
+  document.getElementById('sharePreview').textContent = buildShareText();
+  const btn = document.getElementById('btnCopy');
+  btn.textContent = '📋 Copiar tudo';
+  btn.classList.remove('copied');
+  document.getElementById('shareModal').classList.add('open');
+}
+
+function copyShare() {
+  navigator.clipboard.writeText(buildShareText()).then(() => {
+    const btn = document.getElementById('btnCopy');
+    btn.textContent = '✅ Copiado!';
+    btn.classList.add('copied');
+    setTimeout(() => { btn.textContent = '📋 Copiar tudo'; btn.classList.remove('copied'); }, 2500);
+  }).catch(() => alert('Copie manualmente o texto acima.'));
+}
+
+// ════════════════════════════════════════
+//  EXPORT PDF — NATITUR PREMIUM LAYOUT v2
+// ════════════════════════════════════════
+function exportPDF() {
+  const { jsPDF } = window.jspdf;
+  const doc = new jsPDF({ unit: 'mm', format: 'a4' });
+
+  const W = 210;
+  const MARGIN = 14;
+  const CONTENT_W = W - MARGIN * 2;
+
+  // ── PALETA ──
+  const C_WHITE      = [255, 255, 255];
+  const C_BG_PAGE    = [248, 252, 249];
+  const C_DARK       = [8, 28, 17];
+  const C_HEADER_MID = [14, 51, 32];
+  const C_ACCENT     = [38, 140, 85];
+  const C_ACCENT_L   = [61, 184, 122];
+  const C_AMBER      = [195, 115, 8];
+  const C_AMBER_L    = [245, 166, 35];
+  const C_TEXT       = [18, 38, 26];
+  const C_MUTED      = [85, 125, 100];
+  const C_BORDER     = [185, 220, 200];
+  const C_ROW_ALT    = [235, 248, 241];
+  const C_CAT_HDR    = [20, 60, 40];
+  const C_CHIP_BG    = [228, 244, 235];
+  const C_FOOTER     = [20, 60, 40];
+
+  function setFill(rgb) { doc.setFillColor(...rgb); }
+  function setDraw(rgb) { doc.setDrawColor(...rgb); }
+  function setTxt(rgb)  { doc.setTextColor(...rgb); }
+  function fillRect(x, y, w, h, r) {
+    if (r) doc.roundedRect(x, y, w, h, r, r, 'F');
+    else doc.rect(x, y, w, h, 'F');
+  }
+
+  // Pré-calcula totais
+  let grand = 0, totalItems = 0;
+  state.categories.forEach(cat => {
+    cat.items.forEach(item => {
+      grand += (parseFloat(item.col1)||0) * (parseFloat(item.price)||0);
+      totalItems++;
+    });
+  });
+  const perPerson = (state.people && grand > 0)
+    ? (grand / parseFloat(state.people)).toFixed(2).replace('.', ',')
+    : null;
+  const perFamily = (state.families && grand > 0)
+    ? (grand / parseFloat(state.families)).toFixed(2).replace('.', ',')
+    : null;
+  const dateStr = new Date().toLocaleDateString('pt-BR');
+  
+  // Data do churrasco formatada
+  let eventDateDisplay = '';
+  if (state.eventDate) {
+    const parts = state.eventDate.split('-');
+    if (parts.length === 3) {
+      eventDateDisplay = `${parts[2]}/${parts[1]}/${parts[0]}`;
+    } else {
+      eventDateDisplay = state.eventDate;
+    }
+  } else {
+    eventDateDisplay = dateStr;
+  }
+
+  // ── Função: nova página com fundo ──
+  function newPage() {
+    doc.addPage();
+    setFill(C_BG_PAGE); fillRect(0, 0, W, 297);
+    drawFooter();
+  }
+
+  function drawFooter() {
+    setFill(C_FOOTER);
+    fillRect(0, 285, W, 12);
+    // Leaf decoration in footer
+    doc.setFont('helvetica', 'normal');
+    doc.setFontSize(7);
+    setTxt([130, 200, 165]);
+    doc.text('Natitur  |  natureza · viagens', MARGIN, 291);
+    doc.text(`Gerado em ${dateStr}`, W - MARGIN, 291, { align: 'right' });
+  }
+
+  // ════════════════════════
+  //  FUNÇÃO: desenhar logo Natitur vetorial no PDF
+  // ════════════════════════
+  function drawLogo(lx, ly, size) {
+    const s = size / 28; // scale factor (base 28)
+    const cx = lx + 14 * s;
+    const cy = ly + 14 * s;
+    const r  = 12 * s;
+
+    // Círculo de fundo escuro
+    setFill(C_DARK);
+    doc.circle(cx, cy, r, 'F');
+
+    // Arco dourado (arc path — partial circle top-right)
+    setDraw(C_AMBER_L);
+    doc.setLineWidth(1.2 * s);
+    doc.arc = doc.arc || function(){};
+    // Simulate arc: top quarter circle
+    doc.setDrawColor(...C_AMBER_L);
+    // draw partial arc using lines
+    const steps = 20;
+    const startAngle = -Math.PI * 0.9;
+    const endAngle   = -Math.PI * 0.05;
+    for (let i = 0; i < steps; i++) {
+      const a1 = startAngle + (endAngle - startAngle) * (i / steps);
+      const a2 = startAngle + (endAngle - startAngle) * ((i + 1) / steps);
+      const ra = (r + 1.5 * s);
+      doc.line(cx + ra * Math.cos(a1), cy + ra * Math.sin(a1),
+               cx + ra * Math.cos(a2), cy + ra * Math.sin(a2));
+    }
+
+    // Montanhas (polígonos)
+    setFill([22, 100, 62]);
+    const m1x = cx - 11*s, m1y = cy + 5*s;
+    const m2x = cx - 3*s,  m2y = cy - 5*s;
+    const m3x = cx + 3*s,  m3y = cy + 1*s;
+    const m4x = cx + 10*s, m4y = cy - 7*s;
+    const m5x = cx + 12*s, m5y = cy + 5*s;
+    const base = cy + 8*s;
+    doc.triangle(m1x, base, m2x, m2y, cx-5*s, base, 'F');
+    setFill([28, 120, 75]);
+    doc.triangle(m2x, m2y, m3x, m3y, cx+0*s, base, 'F');
+    setFill([22, 100, 62]);
+    doc.triangle(m3x, m3y, m4x, m4y, cx+9*s, base, 'F');
+
+    // Caminho/rio (creme)
+    setFill([210, 190, 160]);
+    doc.ellipse(cx - 2*s, cy + 5*s, 2*s, 4*s, 'F');
+
+    // Estrela/bússola (dourado)
+    const sx = cx - 2*s, sy = cy - 8*s;
+    setFill(C_AMBER_L);
+    doc.triangle(sx, sy - 3*s, sx - 1.5*s, sy + 1*s, sx + 1.5*s, sy + 1*s, 'F');
+    doc.triangle(sx, sy + 4*s, sx - 1.5*s, sy + 0*s, sx + 1.5*s, sy + 0*s, 'F');
+    doc.triangle(sx - 3*s, sy + 0.5*s, sx + 0*s, sy - 1.5*s, sx + 0*s, sy + 2.5*s, 'F');
+    doc.triangle(sx + 3*s, sy + 0.5*s, sx + 0*s, sy - 1.5*s, sx + 0*s, sy + 2.5*s, 'F');
+
+    // Folha (canto inferior)
+    setFill([45, 160, 95]);
+    doc.triangle(cx + 7*s, cy + 6*s, cx + 14*s, cy - 2*s, cx + 8*s, cy - 3*s, 'F');
+    setFill([35, 130, 75]);
+    doc.triangle(cx + 7*s, cy + 6*s, cx + 12*s, cy + 2*s, cx + 8*s, cy - 3*s, 'F');
+  }
+
+  // ════════════════════════
+  //  IMAGENS DE CHURRASCO (base64 SVG inline — evita CORS; usa gradient art)
+  //  Criamos mini-ilustrações vetoriais temáticas embutidas
+  // ════════════════════════
+  // Não há como embutir fotos reais sem CORS em jsPDF puro.
+  // Alternativa: decoração visual geométrica estilizada (smoke/flame/grill effect)
+  function drawGrillDecor(x, y, w, h) {
+    // Fundo escurecido
+    setFill([5, 20, 12]);
+    fillRect(x, y, w, h);
+
+    // Grelha lines
+    setDraw([40, 80, 55]);
+    doc.setLineWidth(0.4);
+    for (let i = 0; i <= 6; i++) {
+      const gy = y + (h / 6) * i;
+      doc.line(x, gy, x + w, gy);
+    }
+    for (let i = 0; i <= 8; i++) {
+      const gx = x + (w / 8) * i;
+      doc.line(gx, y, gx, y + h);
+    }
+
+    // Chama/brasa glow
+    setFill([180, 60, 10]);
+    doc.ellipse(x + w * 0.25, y + h * 0.7, w * 0.08, h * 0.12, 'F');
+    setFill([220, 100, 20]);
+    doc.ellipse(x + w * 0.25, y + h * 0.65, w * 0.05, h * 0.09, 'F');
+    setFill([245, 180, 20]);
+    doc.ellipse(x + w * 0.25, y + h * 0.61, w * 0.03, h * 0.06, 'F');
+
+    setFill([180, 60, 10]);
+    doc.ellipse(x + w * 0.6, y + h * 0.72, w * 0.09, h * 0.11, 'F');
+    setFill([220, 100, 20]);
+    doc.ellipse(x + w * 0.6, y + h * 0.66, w * 0.06, h * 0.08, 'F');
+    setFill([245, 180, 20]);
+    doc.ellipse(x + w * 0.6, y + h * 0.62, w * 0.035, h * 0.055, 'F');
+
+    // Smoke wisps
+    setDraw([80, 120, 95]);
+    doc.setLineWidth(0.6);
+    doc.lines([[0,-2],[1,-3],[-1,-3],[0,-3]], x + w*0.25, y + h*0.55, [1,1], 'S');
+    doc.lines([[0,-2],[-1,-3],[1,-3],[0,-3]], x + w*0.6, y + h*0.55, [1,1], 'S');
+
+    // Picanha silhouette
+    setFill([90, 35, 15]);
+    doc.roundedRect(x + w*0.1, y + h*0.35, w*0.35, h*0.25, 2, 2, 'F');
+    setFill([120, 50, 20]);
+    doc.roundedRect(x + w*0.11, y + h*0.36, w*0.33, h*0.23, 1.5, 1.5, 'F');
+    // fat cap
+    setFill([220, 190, 150]);
+    doc.roundedRect(x + w*0.11, y + h*0.36, w*0.33, h*0.07, 1.5, 1.5, 'F');
+
+    setFill([90, 35, 15]);
+    doc.roundedRect(x + w*0.5, y + h*0.38, w*0.4, h*0.2, 2, 2, 'F');
+    setFill([130, 55, 22]);
+    doc.roundedRect(x + w*0.51, y + h*0.39, w*0.38, h*0.18, 1.5, 1.5, 'F');
+    setFill([220, 190, 150]);
+    doc.roundedRect(x + w*0.51, y + h*0.39, w*0.38, h*0.06, 1.5, 1.5, 'F');
+  }
+
+  // ════════════════════════
+  //  PÁG. 1: CAPA PREMIUM
+  // ════════════════════════
+  setFill(C_BG_PAGE); fillRect(0, 0, W, 297);
+
+  // ── CAPA: faixa de grelha ilustrativa no topo ──
+  drawGrillDecor(0, 0, W, 58);
+
+  // Overlay gradient escurecido sobre grelha
+  setFill([8, 28, 17]);
+  doc.setGState && doc.setGState(new doc.GState({ opacity: 0.55 }));
+  fillRect(0, 0, W, 58);
+  doc.setGState && doc.setGState(new doc.GState({ opacity: 1 }));
+
+  // Faixa accent dourada no topo (3px)
+  setFill(C_AMBER_L);
+  fillRect(0, 0, W, 2.5);
+
+  // Logo Natitur (desenhado vetorialmente)
+  drawLogo(MARGIN, 8, 32);
+
+  // Nome Natitur ao lado da logo
+  doc.setFont('helvetica', 'bold');
+  doc.setFontSize(26);
+  setTxt([200, 240, 218]);
+  doc.text('Natitur', MARGIN + 38, 22);
+
+  doc.setFont('helvetica', 'normal');
+  doc.setFontSize(8);
+  setTxt([100, 170, 135]);
+  doc.text('N A T U R E Z A   ·   V I A G E N S', MARGIN + 38, 29);
+
+  // Nome do evento (direita, no header)
+  doc.setFont('helvetica', 'bold');
+  doc.setFontSize(13);
+  setTxt(C_AMBER_L);
+  doc.text(state.eventName || 'Evento', W - MARGIN, 18, { align: 'right' });
+
+  doc.setFont('helvetica', 'normal');
+  doc.setFontSize(9);
+  setTxt([180, 230, 205]);
+  doc.text(`📅 ${eventDateDisplay}`, W - MARGIN, 27, { align: 'right' });
+
+  if (state.people) {
+    doc.setFontSize(8);
+    setTxt([130, 190, 160]);
+    doc.text(`👥 ${state.people} pessoas${state.families ? `  ·  🏠 ${state.families} famílias` : ''}`, W - MARGIN, 35, { align: 'right' });
+  }
+
+  // Linha separadora dourada
+  setFill(C_AMBER_L);
+  fillRect(0, 58, W, 1);
+
+  // ── CHIPS DE RESUMO ──
+  const chips = [
+    { label: 'ITENS',     value: String(totalItems),                   icon: '📦' },
+    { label: 'PESSOAS',   value: state.people || '—',                  icon: '👥' },
+    { label: 'TOTAL',     value: `R$ ${grand.toFixed(2).replace('.', ',')}`, hi: true, icon: '💰' },
+  ];
+  if (perPerson) chips.push({ label: 'POR PESSOA', value: `R$ ${perPerson}`, icon: '👤' });
+  if (perFamily) chips.push({ label: 'POR FAMÍLIA', value: `R$ ${perFamily}`, icon: '🏠', amber: true });
+
+  const chipW = (CONTENT_W - (chips.length - 1) * 4) / chips.length;
+  const chipY = 62;
+  chips.forEach((chip, i) => {
+    const cx = MARGIN + i * (chipW + 4);
+    if (chip.hi) {
+      setFill(C_ACCENT);
+      fillRect(cx, chipY, chipW, 19, 3.5);
+      setDraw(C_ACCENT_L); doc.setLineWidth(0.5);
+      doc.roundedRect(cx, chipY, chipW, 19, 3.5, 3.5, 'S');
+    } else if (chip.amber) {
+      setFill([60, 40, 5]);
+      fillRect(cx, chipY, chipW, 19, 3.5);
+      setDraw(C_AMBER_L); doc.setLineWidth(0.5);
+      doc.roundedRect(cx, chipY, chipW, 19, 3.5, 3.5, 'S');
+    } else {
+      setFill(C_CHIP_BG);
+      fillRect(cx, chipY, chipW, 19, 3.5);
+      setDraw(C_BORDER); doc.setLineWidth(0.3);
+      doc.roundedRect(cx, chipY, chipW, 19, 3.5, 3.5, 'S');
+    }
+
+    doc.setFont('helvetica', 'normal');
+    doc.setFontSize(6);
+    setTxt(chip.hi ? [200,255,230] : chip.amber ? [245,180,50] : C_MUTED);
+    doc.text(chip.label, cx + chipW / 2, chipY + 6, { align: 'center' });
+
+    doc.setFont('helvetica', 'bold');
+    doc.setFontSize(chip.hi ? 10 : chip.amber ? 9 : 8.5);
+    setTxt(chip.hi ? C_WHITE : chip.amber ? C_AMBER_L : C_TEXT);
+    doc.text(chip.value, cx + chipW / 2, chipY + 14.5, { align: 'center' });
+  });
+
+  let y = 90;
+
+  // ════════════════════════
+  //  CATEGORIAS
+  // ════════════════════════
+  const COL_NAME  = MARGIN + 3;
+  const COL_BRAND = MARGIN + 75;
+  const COL_QTD   = MARGIN + 112;
+  const COL_UN    = MARGIN + 126;
+  const COL_UNIT  = MARGIN + 143;
+  const COL_SUB   = W - MARGIN;
+
+  state.categories.forEach(cat => {
+    let catTotal = 0;
+    cat.items.forEach(item => {
+      catTotal += (parseFloat(item.col1)||0) * (parseFloat(item.price)||0);
+    });
+
+    const needed = 16 + cat.items.length * 11 + 10;
+    if (y + Math.min(needed, 30) > 280) { newPage(); y = 14; }
+
+    // ── Header da categoria ──
+    setFill(C_CAT_HDR);
+    fillRect(MARGIN, y, CONTENT_W, 13, 3);
+
+    // Faixa accent esquerda (verde)
+    setFill(C_ACCENT_L);
+    fillRect(MARGIN, y, 3.5, 13, 2);
+
+    doc.setFont('helvetica', 'bold');
+    doc.setFontSize(9);
+    setTxt(C_WHITE);
+    doc.text(cat.name.toUpperCase(), MARGIN + 10, y + 9);
+
+    if (catTotal > 0) {
+      // Badge âmbar com total
+      setFill(C_AMBER_L);
+      fillRect(W - MARGIN - 36, y + 3, 34, 7.5, 2.5);
+      doc.setFont('helvetica', 'bold');
+      doc.setFontSize(7.5);
+      setTxt([30, 15, 0]);
+      doc.text(`R$ ${catTotal.toFixed(2).replace('.', ',')}`, W - MARGIN - 2, y + 9, { align: 'right' });
+    }
+    y += 15;
+
+    // Cabeçalho colunas
+    doc.setFont('helvetica', 'normal');
+    doc.setFontSize(6);
+    setTxt(C_MUTED);
+    doc.text('ITEM / DESCRICAO', COL_NAME, y);
+    doc.text('MARCA', COL_BRAND, y);
+    doc.text(state.col1Label.toUpperCase(), COL_QTD, y);
+    doc.text(state.col2Label.toUpperCase(), COL_UN, y);
+    doc.text('R$/UN', COL_UNIT, y);
+    doc.text('SUBTOTAL', COL_SUB, y, { align: 'right' });
+    y += 1.5;
+
+    setDraw(C_BORDER); doc.setLineWidth(0.2);
+    doc.line(MARGIN, y, W - MARGIN, y);
+    y += 3.5;
+
+    // ── Itens ──
+    cat.items.forEach((item, idx) => {
+      const q  = parseFloat(item.col1) || 0;
+      const p  = parseFloat(item.price) || 0;
+      const sub = q * p;
+      const pm = parseFloat(item.pesoMedio) || 0;
+      const pk = parseFloat(item.precoKg) || 0;
+
+      const hasObs    = !!item.obs;
+      const hasPesoKg = pm > 0 && pk > 0;
+      const extraLines = (hasObs ? 1 : 0) + (hasPesoKg ? 1 : 0);
+      const rowH = 9 + extraLines * 4.5;
+
+      if (y + rowH + 2 > 280) { newPage(); y = 14; }
+
+      // Fundo alternado
+      if (idx % 2 === 0) {
+        setFill(C_ROW_ALT);
+        fillRect(MARGIN, y - 1.5, CONTENT_W, rowH, 1.5);
+      }
+
+      // Nome
+      doc.setFont('helvetica', 'bold');
+      doc.setFontSize(8.5);
+      setTxt(C_TEXT);
+      const nameStr = item.name || '(sem nome)';
+      const maxNameChars = 38;
+      const displayName = nameStr.length > maxNameChars ? nameStr.slice(0, maxNameChars - 1) + '…' : nameStr;
+      doc.text(displayName, COL_NAME, y + 5);
+
+      // Marca
+      if (item.brand) {
+        doc.setFont('helvetica', 'normal');
+        doc.setFontSize(7);
+        setTxt(C_ACCENT);
+        const br = item.brand.length > 13 ? item.brand.slice(0,12)+'…' : item.brand;
+        doc.text(br, COL_BRAND, y + 5);
+      }
+
+      // Qtd / Un / Preço
+      doc.setFont('helvetica', 'normal');
+      doc.setFontSize(8);
+      setTxt(C_TEXT);
+      if (item.col1) doc.text(item.col1, COL_QTD, y + 5);
+      if (item.col2) doc.text(item.col2, COL_UN,  y + 5);
+      if (p > 0) doc.text(p.toFixed(2).replace('.', ','), COL_UNIT, y + 5);
+
+      // Subtotal
+      if (sub > 0) {
+        doc.setFont('helvetica', 'bold');
+        doc.setFontSize(8.5);
+        setTxt(C_AMBER);
+        doc.text(`R$ ${sub.toFixed(2).replace('.', ',')}`, COL_SUB, y + 5, { align: 'right' });
+      }
+
+      let extraY = y + 9;
+
+      if (hasPesoKg) {
+        doc.setFont('helvetica', 'italic');
+        doc.setFontSize(6.8);
+        setTxt(C_MUTED);
+        doc.text(`Peso med.: ${pm}kg/un  |  R$ ${pk.toFixed(2).replace('.',',')}/kg  =>  R$ ${(pm*pk).toFixed(2).replace('.',',')}/un`, COL_NAME + 4, extraY);
+        extraY += 4.5;
+      }
+
+      if (hasObs) {
+        doc.setFont('helvetica', 'italic');
+        doc.setFontSize(6.8);
+        setTxt(C_MUTED);
+        const obsStr = item.obs.length > 80 ? item.obs.slice(0,79)+'…' : item.obs;
+        doc.text(`Obs: ${obsStr}`, COL_NAME + 4, extraY);
+      }
+
+      y += rowH + 1;
+    });
+
+    // Linha divisória de categoria
+    setDraw([210, 235, 220]); doc.setLineWidth(0.2);
+    doc.line(MARGIN, y + 2, W - MARGIN, y + 2);
+    y += 8;
+  });
+
+  // ════════════════════════
+  //  TOTAL FINAL — PREMIUM BOX
+  // ════════════════════════
+  const totalBoxH = perFamily ? 38 : perPerson ? 32 : 26;
+  if (y + totalBoxH + 6 > 280) { newPage(); y = 14; }
+
+  // Linha decorativa antes do total
+  setDraw(C_ACCENT_L); doc.setLineWidth(0.8);
+  doc.line(MARGIN, y, W - MARGIN, y);
+  // Triângulo decorativo no centro
+  setFill(C_ACCENT_L);
+  doc.triangle(W/2 - 4, y - 0.5, W/2 + 4, y - 0.5, W/2, y + 3, 'F');
+  y += 5;
+
+  // Caixa total com bordas arredondadas e degradê simulado
+  setFill(C_CAT_HDR);
+  fillRect(MARGIN, y, CONTENT_W, totalBoxH, 5);
+  // Faixa dourada no topo da caixa
+  setFill(C_AMBER_L);
+  fillRect(MARGIN, y, CONTENT_W, 4, 5);
+  setFill(C_CAT_HDR);
+  fillRect(MARGIN, y + 2, CONTENT_W, 4);
+  // Borda
+  setDraw(C_AMBER_L); doc.setLineWidth(0.7);
+  doc.roundedRect(MARGIN, y, CONTENT_W, totalBoxH, 5, 5, 'S');
+
+  // Label TOTAL GERAL
+  doc.setFont('helvetica', 'normal');
+  doc.setFontSize(7.5);
+  setTxt([140, 195, 170]);
+  doc.text('TOTAL GERAL', MARGIN + 12, y + 11);
+
+  // Valor grande
+  doc.setFont('helvetica', 'bold');
+  doc.setFontSize(22);
+  setTxt(C_ACCENT_L);
+  doc.text(`R$ ${grand.toFixed(2).replace('.', ',')}`, W - MARGIN - 6, y + 18, { align: 'right' });
+
+  let infoY = y + 11;
+
+  if (perPerson) {
+    infoY += 6;
+    doc.setFont('helvetica', 'normal');
+    doc.setFontSize(8);
+    setTxt([160, 215, 188]);
+    doc.text(`👤 Por pessoa: R$ ${perPerson}`, MARGIN + 12, infoY);
+  }
+
+  if (perFamily) {
+    infoY += 6;
+    // Destaque âmbar para o valor por família
+    setFill([55, 38, 5]);
+    fillRect(MARGIN + 8, infoY - 4.5, CONTENT_W * 0.5, 7, 2);
+    doc.setFont('helvetica', 'bold');
+    doc.setFontSize(8.5);
+    setTxt(C_AMBER_L);
+    doc.text(`🏠 Por família: R$ ${perFamily}`, MARGIN + 12, infoY);
+    if (state.families) {
+      doc.setFont('helvetica', 'normal');
+      doc.setFontSize(7);
+      setTxt([180, 145, 60]);
+      doc.text(`(${state.families} famílias)`, MARGIN + 12 + 68, infoY);
+    }
+  }
+
+  y += totalBoxH + 6;
+
+  // ── Nota de rodapé final ──
+  if (y + 12 < 278) {
+    doc.setFont('helvetica', 'italic');
+    doc.setFontSize(7);
+    setTxt(C_MUTED);
+    doc.text('* Valores sujeitos a variação conforme disponibilidade dos produtos.', W / 2, y + 6, { align: 'center' });
+  }
+
+  // ── RODAPÉ em todas as páginas ──
+  const totalPages = doc.internal.getNumberOfPages();
+  for (let pg = 1; pg <= totalPages; pg++) {
+    doc.setPage(pg);
+    drawFooter();
+  }
+
+  const safeName = (state.eventName || 'Orcamento').replace(/\s+/g, '_').replace(/[^a-zA-Z0-9_\-]/g, '');
+  const safeDate = eventDateDisplay.replace(/\//g, '-');
+  const filename = `Natitur_${safeName}_${safeDate}.pdf`;
+  doc.save(filename);
+}
+
+
+
+function closeModal(id) { document.getElementById(id).classList.remove('open'); }
+
+document.querySelectorAll('.modal-overlay').forEach(o => {
+  o.addEventListener('click', e => {
+    if (e.target === o) { o.classList.remove('open'); pendingEmojiTarget = null; }
+  });
+});
+
+// ════════════════════════════════════════
+//  INIT
+// ════════════════════════════════════════
+initSlots();
+loadState();
+render();
+
+// Autosave a cada 30s se houver alterações
+setInterval(() => { if (_isDirty) saveState(); }, 30000);
+
+function confirmNewEvent() {
+  closeModal('settingsModal');
+  if (_isDirty) {
+    showExitModal(() => { clearState(); location.reload(); });
+  } else {
+    if (confirm('⚠️ Isso vai apagar TUDO e começar um novo evento. Tem certeza?')) {
+      clearState(); location.reload();
+    }
+  }
+}
+</script>
+</body>
+</html>
